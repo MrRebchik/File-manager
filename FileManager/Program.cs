@@ -1,4 +1,11 @@
-using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.OpenApi.Models;
+using FileManagerAPI.Models;
 
 namespace FileManager
 {
@@ -7,38 +14,67 @@ namespace FileManager
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateSlimBuilder(args);
-
-            builder.Services.ConfigureHttpJsonOptions(options =>
-            {
-                options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+            builder.Services.AddDbContext<StorageContext>(options => { 
+                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=storagedb;Trusted_Connection=True;"); 
+                options.EnableSensitiveDataLogging(true); });
+            builder.Services.AddDbContext<PeopleContext>(options => {
+                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=peopledb;Trusted_Connection=True;");
+                options.EnableSensitiveDataLogging(true);
             });
-
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = AuthOptions.ISSUER,
+                        ValidateAudience = true,
+                        ValidAudience = AuthOptions.AUDIENCE,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                        ValidateIssuerSigningKey = true,
+                    };
+                });
+            builder.Services.AddControllers();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApp", Version = "v1" });
+            });
             var app = builder.Build();
 
-            var sampleTodos = new Todo[] {
-                new(1, "Walk the dog"),
-                new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-                new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-                new(4, "Clean the bathroom"),
-                new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
-            };
+            using (var serviceScope = app.Services.CreateScope())
+            {
+                var services = serviceScope.ServiceProvider;
 
-            var todosApi = app.MapGroup("/todos");
-            todosApi.MapGet("/", () => sampleTodos);
-            todosApi.MapGet("/{id}", (int id) =>
-                sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-                    ? Results.Ok(todo)
-                    : Results.NotFound());
+                SeedData.SeedPeopleDatabase(services.GetRequiredService<PeopleContext>());
+                SeedData.SeedStorageDatabase(services.GetRequiredService<StorageContext>());
+            }
+            //SeedData.SeedPeopleDatabase(app.Services.GetService<PeopleContext>());
+            //SeedData.SeedStorageDatabase(app.Services.GetService<StorageContext>());
+
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseStatusCodePages();
+            //app.MapDefaultControllerRoute();
+            app.MapControllers();
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApp");
+            });
 
             app.Run();
         }
+        
     }
-
-    public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-    [JsonSerializable(typeof(Todo[]))]
-    internal partial class AppJsonSerializerContext : JsonSerializerContext
+    public class AuthOptions
     {
-
+        public const string ISSUER = "MyAuthServer";
+        public const string AUDIENCE = "MyAuthClient";
+        const string KEY = "rP2YHcb8sWHtvhi6DzqR1oHoddZ5IaQvN_oOmK4";
+        public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
     }
 }
