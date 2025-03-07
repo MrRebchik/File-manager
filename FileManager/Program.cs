@@ -50,18 +50,18 @@ namespace FileManager
                 SeedData.SeedPeopleDatabase(services.GetRequiredService<PeopleContext>());
                 SeedData.SeedStorageDatabase(services.GetRequiredService<StorageContext>());
             }
-
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApp");
+            });
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseStatusCodePages();
             //app.MapDefaultControllerRoute();
             app.MapControllers();
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApp");
-            });
+            
 
             app.Run();
         }

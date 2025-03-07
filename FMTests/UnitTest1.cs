@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
-using Xunit;
 using FileManagerAPI.Controllers;
 using FileManagerLibrary.Models;
 using Microsoft.EntityFrameworkCore;
