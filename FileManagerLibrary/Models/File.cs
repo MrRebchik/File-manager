@@ -11,5 +11,6 @@ namespace FileManagerLibrary.Models
         public DateOnly TouchDate { get; set; }
         [NotMapped]
         public bool IsDirectory { get => false; }
+        public File() { }
     }
 }

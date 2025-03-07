@@ -6,6 +6,11 @@ using Avalonia.Markup.Xaml;
 using FileManagerClient.ViewModels;
 using FileManagerClient.Views;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
+using FileManagerClient.Services;
+using Avalonia.Controls;
+using System;
 
 namespace FileManagerClient
 {
@@ -18,15 +23,15 @@ namespace FileManagerClient
 
         public override void OnFrameworkInitializationCompleted()
         {
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+
+            var serviceProvider = services.BuildServiceProvider();
+            ServiceProviderHolder.ServiceProvider = serviceProvider;
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-                // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = new MainWindowViewModel(),
-                };
+                desktop.MainWindow = new AuthWindow();
             }
 
             base.OnFrameworkInitializationCompleted();
@@ -44,5 +49,19 @@ namespace FileManagerClient
                 BindingPlugins.DataValidators.Remove(plugin);
             }
         }
+        private void ConfigureServices(IServiceCollection services)
+        {
+
+            services.AddHttpClient();
+
+            services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IStorageProviderService, StorageProviderService>();
+            services.AddTransient<AuthWindow>();
+            services.AddSingleton<MainWindow>();
+        }
+    }
+    public static class ServiceProviderHolder
+    {
+        public static IServiceProvider ServiceProvider { get; set; }
     }
 }

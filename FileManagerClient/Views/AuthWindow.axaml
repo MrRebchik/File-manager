@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:FileManagerClient.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="FileManagerClient.AuthWindow"
+		x:DataType="vm:AuthWindowViewModel"
+        Title="AuthWindow">
+	
+	<Grid ColumnDefinitions="*,*,*">
+		<Grid Grid.Column="1" RowDefinitions="6*,*,2*,*,2*,3*,6*">
+			<Label Grid.Column="1" Grid.Row="1" Content="Email"/>
+			<TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Username}"/>
+			<Label Grid.Column="1" Grid.Row="3" Content="Password"/>
+			<TextBox Grid.Column="1" Grid.Row="4" Text="{Binding Password}"/>
+			<Button Grid.Column="1" Grid.Row="5" Width="150" Margin="10" HorizontalAlignment="Center" Command="{Binding LoginCommand}">
+				<Label Content="LogIn" HorizontalAlignment="Center"/>
+			</Button>
+			<StackPanel Grid.Column="1" Grid.Row="6" IsVisible="{Binding IsIncorrectInput}" Orientation="Vertical">
+				<TextBlock Text="Неверные данные учетной записи. Зарегистрируйтесь, если вы впервые" 
+						   TextWrapping="Wrap" 
+						   TextAlignment="Justify"
+						   Height="50"
+						   HorizontalAlignment="Center"/>
+				<Button Command="{Binding RegisterCommand}" HorizontalAlignment="Center">
+					<Label Content="SignUp" HorizontalAlignment="Center"/>
+				</Button>
+			</StackPanel>
+		</Grid>
+	</Grid>
+</Window>

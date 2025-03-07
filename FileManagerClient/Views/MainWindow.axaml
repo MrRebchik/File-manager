@@ -1,20 +1,66 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:FileManagerClient.ViewModels"
+		xmlns:v="using:FileManagerClient.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		xmlns:local="using:FileManagerClient"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="FileManagerClient.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="FileManagerClient">
+        Title="FileManagerClient"
+		MinHeight="500"
+		MinWidth="700">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+	<Grid Margin="10" RowDefinitions="40, 30, auto">
+		<Grid Grid.Row="0" ColumnDefinitions="5*, 2*">
+			<Label Padding="10,6" Content="{Binding CurrentPath}" Grid.Column="0" VerticalAlignment="Top" Background="LightGray" CornerRadius="10" Height="30"/>
+			<Grid Grid.Column="1" HorizontalAlignment="Right" ColumnDefinitions="auto, auto">
+				<Image Source="/Assets/profile.png" Margin="20, 0" Grid.Column="0" Height="33" VerticalAlignment="Top" HorizontalAlignment="Right" />
+				<Label Grid.Column="1" Content="{Binding Username}" HorizontalAlignment="Right"/>
+			</Grid>
+		</Grid>
+		<DockPanel Grid.Row="1">
+			<Button Padding="0" Command="{Binding GoBackCommand}">
+				<DockPanel>
+					<Image Source="avares://FileManagerClient/Assets/arrow.png" Width="12" Margin="6,5" />
+					<Label Content="Назад" FontSize="12" VerticalAlignment="Center"/>
+				</DockPanel>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+			</Button>
+			<Button Padding="0" Command="{Binding SortItemsAlphabeticallyCommand}">
+				<DockPanel>
+					<Image Source="avares://FileManagerClient/Assets/arrows.png" Width="16" Margin="6,5" />
+					<Label Content="Фильтровать" FontSize="14" VerticalAlignment="Center"/>
+				</DockPanel>
+				
+			</Button>
+			
+		</DockPanel>
+		<Grid Grid.Row="2" Margin="0, 15">
+			<ListBox ItemsSource="{Binding includes, Mode=TwoWay}" 
+					 SelectedItem="{Binding SelectedStorageable}"
+					 DoubleTapped="ListBox_DoubleTapped"
+					 IsVisible="{Binding IsDirectory}">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<v:ListItemView />
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+			<Grid IsVisible="{Binding !IsDirectory}" ColumnDefinitions="2*,5*" RowDefinitions="auto,auto,auto,auto,auto">
+				<Label Grid.Column="0" Grid.Row="0" Content="Название"/>
+				<Label Grid.Column="1" Grid.Row="0" Content="{Binding SelectedStorageable.Name}"/>
+				<Label Grid.Column="0" Grid.Row="1" Content="Путь"/>
+				<Label Grid.Column="1" Grid.Row="1" Content="{Binding SelectedStorageable.Path}"/>
+				<Label Grid.Column="0" Grid.Row="2" Content="Расширение"/>
+				<Label Grid.Column="1" Grid.Row="2" Content="{Binding SelectedStorageable.Extention}"/>
+				<Label Grid.Column="0" Grid.Row="3" Content="Последняя дата редактирования"/>
+				<Label Grid.Column="1" Grid.Row="3" Content="{Binding SelectedStorageable.TouchDate}"/>
+				<Label Grid.Column="0" Grid.Row="4" Content="Размер"/>
+				<Label Grid.Column="1" Grid.Row="4" Content="{Binding SelectedStorageable.Volume}"/>
+			</Grid>
+		</Grid>
+	</Grid>
 </Window>

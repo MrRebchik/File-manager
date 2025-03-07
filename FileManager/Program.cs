@@ -50,8 +50,6 @@ namespace FileManager
                 SeedData.SeedPeopleDatabase(services.GetRequiredService<PeopleContext>());
                 SeedData.SeedStorageDatabase(services.GetRequiredService<StorageContext>());
             }
-            //SeedData.SeedPeopleDatabase(app.Services.GetService<PeopleContext>());
-            //SeedData.SeedStorageDatabase(app.Services.GetService<StorageContext>());
 
             app.UseRouting();
             app.UseAuthentication();

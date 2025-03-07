@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace FileManagerLibrary.Models
+﻿namespace FileManagerLibrary.Models
 {
     public class Person
     {
